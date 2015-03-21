@@ -3,18 +3,12 @@ package test;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Persistence;
-import javax.persistence.Table;
 
 import jpamock.instance.JPAMock;
 import junit.framework.TestCase;
+import cadastro.Pessoa;
+import cadastro.Telefone;
 
 public class TestSingle extends TestCase {
 
@@ -38,72 +32,6 @@ public class TestSingle extends TestCase {
 		jpaMock.when(Pessoa.class, "telefones");
 		jpaMock.thenInject(telefones);
 		jpaMock.mock(Pessoa.class);
-	}
-
-	@Entity @Table(name = "PESSOA") public static class Pessoa {
-
-		@Id @GeneratedValue @Column(name = "ID") private Long id;
-
-		@Column(name = "NOME", nullable = false) private String nome;
-
-		@OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = { CascadeType.ALL }) private List<Telefone> telefones;
-
-		public Long getId() {
-			return id;
-		}
-
-		public void setId(Long id) {
-			this.id = id;
-		}
-
-		public String getNome() {
-			return nome;
-		}
-
-		public void setNome(String nome) {
-			this.nome = nome;
-		}
-
-		public List<Telefone> getTelefones() {
-			return telefones;
-		}
-
-		public void setTelefones(List<Telefone> telefones) {
-			this.telefones = telefones;
-		}
-	}
-
-	@Entity @Table(name = "TELEFONE") public static class Telefone {
-
-		@Id @GeneratedValue @Column(name = "ID") private Long id;
-
-		@Column(name = "CODIGO_AREA", nullable = false) private Integer codigoArea;
-
-		@Column(name = "TELEFONE", nullable = false) private String telefone;
-
-		public Long getId() {
-			return id;
-		}
-
-		public void setId(Long id) {
-			this.id = id;
-		}
-
-		public Integer getCodigoArea() {
-			return codigoArea;
-		}
-
-		public void setCodigoArea(Integer codigoArea) {
-			this.codigoArea = codigoArea;
-		}
-
-		public String getTelefone() {
-			return telefone;
-		}
-
-		public void setTelefone(String telefone) {
-			this.telefone = telefone;
-		}
 	}
 
 }

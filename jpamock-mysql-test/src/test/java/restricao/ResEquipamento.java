@@ -49,7 +49,7 @@ public class ResEquipamento {
 	@NotNull(message = "O equipamento deve possuir um tipo de equipamento.")
 	@ManyToMany
 	@JoinTable(name="RES_EQUIP_TIPOEQUIP", joinColumns={@JoinColumn(name="EQUIPAMENTO_ID")}, inverseJoinColumns={@JoinColumn(name="TIPO_EQUIPAMENTO_ID")})
-	public Set<ResTipoEquipamento> tiposEquipamento = new HashSet<ResTipoEquipamento>(0);
+	private Set<ResTipoEquipamento> tiposEquipamento = new HashSet<ResTipoEquipamento>(0);
 
 	@OneToMany(mappedBy = "equipamento")
 	private List<ResHistoricoEquipamento> historicosEquipamento = new ArrayList<ResHistoricoEquipamento>(0);
