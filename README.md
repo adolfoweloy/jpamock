@@ -9,8 +9,8 @@
 ## How does it work?
  Very simple concept. When you call *`jpaMock.mock(SomeMappedEntity.class)`* the framework instantiate all dependencies of your classes using default values and persist all data. For example, if your DB is empty and you call *`jpaMock.mock`* it going to appear a new row for each table on DB, if you call it again, other row is added, resulting two rows for each table. That's it. You can change the behavior and override default values, see bellow. The coolest part is that jpaMock.mock returns the whole persisted object tree, and this is very useful to do asserts.
  
-![Tree](https://i.minus.com/iIJ2BeV44LcxJ.jpg)
-![Inspector](https://i.minus.com/ibt6HJmWaBTBlN.jpg)
+![Tree](http://i.imgur.com/4GdYF1W.jpg)
+![Inspector](http://i.imgur.com/j9Qwfr9.jpg)
 
  Magically new records are created in your DB for Body, Arm, Finger, Leg, Pants and Color. The records data are totally identical to retrieved object tree data (including ids).
 
