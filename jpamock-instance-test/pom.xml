@@ -20,7 +20,7 @@
 		<!-- JPAMock -->
 		<dependency>
 			<groupId>jpamock</groupId>
-			<artifactId>jpamock-new</artifactId>
+			<artifactId>jpamock</artifactId>
 			<version>1.0.0</version>
 			<scope>test</scope>
 		</dependency>
