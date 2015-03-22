@@ -12,14 +12,13 @@
 ![Tree](http://i.imgur.com/4GdYF1W.jpg)
 ![Inspector](http://i.imgur.com/j9Qwfr9.jpg)
 
- Magically new records are created in your DB for Body, Arm, Finger, Leg, Pants and Color. The records data are totally identical to retrieved object tree data (including ids).
+ Magically new records are created in your DB for Body, Arm, Finger, Leg, Pants and Color.
 
 If you call `jpaMock.mock(Pants.class)` you going to get back a root instance of Pants associated with Color. A new record would be created for Pants and Color. This happens becouse you don't have navigation from Pants to Leg. If the association between Leg and Pats was bidirectional, there would be created records for all entities and the unique diference between call `jpaMock.mock(Body.class)` and `jpaMock.mock(Pants.class)` would be  who is the root entity on the retrieved object tree. In other words, if your model are full bidirectional always will be created new records for all tables unless you force null (Ex: `jpaMock.when(Body.class, "arms").thenInject(null);`).
 
 ## Basic usage
 
 ```java
-EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("myUnitName");
 JPAMock jpaMock = new JPAMock(entityManagerFactory);
 ```
 
