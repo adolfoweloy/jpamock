@@ -1,8 +1,6 @@
 package jpamock.persitence;
 
 import java.lang.reflect.Field;
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.Map;
 
 import javax.persistence.Column;
@@ -10,24 +8,27 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import jpamock.reflection.PropertyCallBack;
-import jpamock.reflection.PropertyDescription;
 import jpamock.reflection.RecursiveSearch;
 import jpamock.reflection.Reflection;
 
 public class PrepareIds {
 
 	private Reflection reflection = Reflection.get();
-	private SecureRandom random = new SecureRandom();
+	private DataHelper dataHelper;
 
+	/**
+	 * Receives DataHelper via injection.
+	 * @param dataHelper
+	 */
+	public PrepareIds(DataHelper dataHelper) {
+		this.dataHelper = dataHelper;
+	}
+	
 	public void prepare(Object rootEntity, final EntityManager entityManager, final Map<String, Object> specialFields) {
-		new RecursiveSearch(new PropertyCallBack() {
-			public void propertyCallBack(PropertyDescription propertyDescription) {
+		new RecursiveSearch(propertyDescription -> {
 				if (propertyDescription.getParent().getClass().isAnnotationPresent(Entity.class)) {
 					if (propertyDescription.getIsAutoIncrementId()) {
 						String temp = "";
@@ -44,13 +45,17 @@ public class PrepareIds {
 								Object idTemp = reflection.getProperty(propertyDescription.getParent(), field);
 								if (id == idTemp && reflection.isAnnotationPresent(field, Id.class)
 										&& !reflection.isAnnotationPresent(field, GeneratedValue.class)) {
-									setData(entityManager, propertyDescription, field);
+									
+									Object object = dataHelper.getData(entityManager, propertyDescription, field);
+									reflection.setProperty(propertyDescription.getParent(), field, object);
+									
 									break;
 								}
 							}
 						} else {
 							if (reflection.isAnnotationPresent(propertyDescription.getField(), Id.class)) {
-								setData(entityManager, propertyDescription, propertyDescription.getField());
+								Object object = dataHelper.getData(entityManager, propertyDescription, propertyDescription.getField());
+								reflection.setProperty(propertyDescription.getParent(), propertyDescription.getField(), object);
 							}
 						}
 
@@ -59,7 +64,8 @@ public class PrepareIds {
 							Column.class);
 					if (colum != null && colum.unique()
 							&& !reflection.isAnnotationPresent(propertyDescription.getField(), GeneratedValue.class)) {
-						setData(entityManager, propertyDescription, propertyDescription.getField());
+						Object object = dataHelper.getData(entityManager, propertyDescription, propertyDescription.getField());
+						reflection.setProperty(propertyDescription.getParent(), propertyDescription.getField(), object);
 					}
 
 					Table table = propertyDescription.getParent().getClass().getAnnotation(Table.class);
@@ -83,59 +89,17 @@ public class PrepareIds {
 											}
 										}
 									}
-									setData(entityManager, propertyDescription, tempField);
+									
+									Object object = dataHelper.getData(entityManager, propertyDescription, tempField);
+									reflection.setProperty(propertyDescription.getParent(), propertyDescription.getField(), object);
+									
 								}
 							}
 						}
 					}
 
 				}
-			}
-
-			private void setData(final EntityManager entityManager, PropertyDescription propertyDescription, Field field) {
-				String str = "select max(" + field.getName() + ") from "
-						+ propertyDescription.getParent().getClass().getName();
-				Object object = entityManager.createQuery(str).getSingleResult();
-				if (object != null) {
-					if (object instanceof Byte) {
-						Byte temp = (Byte) object;
-						object = ++temp;
-					} else if (object instanceof Short) {
-						Short temp = (Short) object;
-						object = ++temp;
-					} else if (object instanceof Integer) {
-						Integer temp = (Integer) object;
-						object = ++temp;
-					} else if (object instanceof Long) {
-						Long temp = (Long) object;
-						object = ++temp;
-					} else if (object instanceof Float) {
-						Float temp = (Float) object;
-						object = ++temp;
-					} else if (object instanceof Double) {
-						Double temp = (Double) object;
-						object = ++temp;
-					} else if (object instanceof String) {
-						object = null;
-						while (object == null) {
-							object = new BigInteger(32, random).toString(32);
-							String hql = "select " + field.getName() + " from "
-									+ propertyDescription.getParent().getClass().getName() + " where "
-									+ field.getName() + " = :temp";
-							Query q = entityManager.createQuery(hql).setParameter("temp", object);
-							try {
-								object = q.getSingleResult();
-							} catch (NoResultException nre) {
-
-							}
-						}
-					} else {
-						throw new RuntimeException("Type not predicted (" + object.getClass()
-								+ "). Change PrepareIds.java!");
-					}
-					reflection.setProperty(propertyDescription.getParent(), field, object);
-				}
-			}
+			
 		}).start(rootEntity);
 	}
 }

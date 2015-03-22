@@ -5,18 +5,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Savepoint;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-import jpamock.reflection.PropertyCallBack;
-import jpamock.reflection.PropertyDescription;
 import jpamock.reflection.RecursiveSearch;
 import jpamock.reflection.Reflection;
 
@@ -41,7 +39,7 @@ public class JDBCPersistence {
 				connection = getConnection(entityManager);
 				dbHelper = new DBHelper(connection);
 				dbHelper.disableConstaints();
-				prepareIds = new PrepareIds();
+				prepareIds = new PrepareIds(new DataHelper());
 				prepareIds.prepare(rootEntity, entityManager, specialFields);
 				return persistReal(rootEntity, entityManager, connection);
 			} catch (Throwable t) {
@@ -152,16 +150,16 @@ public class JDBCPersistence {
 
 	private LinkedList<Entry<Object, InsertDeletStatement>> fillAllToPersist(Object rootEntity) {
 		final LinkedList<Entry<Object, InsertDeletStatement>> allToPersist = new LinkedList<Entry<Object, InsertDeletStatement>>();
-		new RecursiveSearch(new PropertyCallBack() {
-			public void propertyCallBack(PropertyDescription propertyDescription) {
-				Object object = propertyDescription.getParent();
-				if (object.getClass().isAnnotationPresent(Entity.class)) {
-					for (Entry<Object, InsertDeletStatement> entry : allToPersist)
-						if (entry.getKey().equals(object))
-							return;
-					allToPersist.add(new SimpleEntry<Object, InsertDeletStatement>(propertyDescription.getParent(), null));
-				}
+		new RecursiveSearch(propertyDescription -> {
+			
+			Object object = propertyDescription.getParent();
+			if (object.getClass().isAnnotationPresent(Entity.class)) {
+				for (Entry<Object, InsertDeletStatement> entry : allToPersist)
+					if (entry.getKey().equals(object))
+						return;
+				allToPersist.add(new SimpleEntry<Object, InsertDeletStatement>(propertyDescription.getParent(), null));
 			}
+				
 		}).start(rootEntity);
 		return allToPersist;
 	}
