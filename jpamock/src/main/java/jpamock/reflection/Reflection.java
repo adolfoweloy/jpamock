@@ -20,21 +20,24 @@ public class Reflection {
 	}
 
 	public void setProperty(Object obj, Field field, Object value) {
-		try {
-			field.setAccessible(true);
-			field.set(obj, value);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		if (value != null) {
+			try {
+				field.setAccessible(true);
+				field.set(obj, value);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
 	}
 
 	public void setProperty(Object obj, String field, Object value) {
-		try {
-			setProperty(obj, obj.getClass().getDeclaredField(field), value);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		if (value != null) {
+			try {
+				setProperty(obj, obj.getClass().getDeclaredField(field), value);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
-
 	}
 
 	public Object getProperty(Object obj, Field field) {
