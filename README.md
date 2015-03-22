@@ -66,7 +66,8 @@ public void testFindCabByDriverCountryId(){
 ```
 
 ```java
-//Having metadata like @BeanValidation (JSR303)
+//Working with @BeanValidation (JSR303)
+
 @Entity public class Image(){
   @Min(2) Float sizeInMB;
 }
